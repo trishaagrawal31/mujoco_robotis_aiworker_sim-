@@ -9,32 +9,37 @@ class RobotisMujocoBridge(Node):
     def __init__(self):
         super().__init__('robotis_mujoco_bridge')
 
-        # Load the ROBOTIS model directly from your cloned directory
-        self.model = mujoco.MjModel.from_xml_path('/home/trisha/Desktop/MuJoCo/robotis_mujoco_menagerie/robotis_ffw/scene_ffw_sg2.xml')
+        self.model = mujoco.MjModel.from_xml_path(
+            '/home/trisha/Desktop/MuJoCo/robotis_mujoco_menagerie/robotis_ffw/scene_ffw_sg2.xml'
+        )
         self.data = mujoco.MjData(self.model)
 
-        # ROS 2 Publisher for Joint States
         self.joint_pub = self.create_publisher(JointState, 'joint_states', 10)
-
-        # Launch the interactive native MuJoCo viewer in a non-blocking mode
         self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
-
-        # Create a simulation step timer (e.g., 100Hz)
         self.timer = self.create_timer(0.01, self.sim_step)
+
+        self.step_count = 0
+        self.target_steps = 800  # increase if it does not reach the table
 
     def sim_step(self):
         if self.viewer.is_running():
-            # Step the physics engine
-            mujoco.mj_step(self.model, self.data)
+            # reset controls
+            self.data.ctrl[:] = 0.0
 
-            # Sync physics data with the visualizer window
+            # drive straight forward until target steps reached
+            if self.step_count < self.target_steps:
+                self.data.ctrl[3] = 30.0   # left_wheel_drive
+                self.data.ctrl[4] = 30.0   # right_wheel_drive
+                self.data.ctrl[5] = 30.0   # rear_wheel_drive
+                self.step_count += 1
+
+            mujoco.mj_step(self.model, self.data)
             self.viewer.sync()
 
-            # Example: Publish the joint states to ROS
             msg = JointState()
             msg.header.stamp = self.get_clock().now().to_msg()
-            # Fill msg.name, msg.position, etc. using self.data.qpos
             self.joint_pub.publish(msg)
+    
 
 def main(args=None):
     rclpy.init(args=args)
