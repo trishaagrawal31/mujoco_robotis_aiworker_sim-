@@ -30,6 +30,8 @@
     <mesh name="gripper_r2" file="rh_p12_rn/r2.stl" scale="0.001 0.001 0.001"/>
     <mesh name="gripper_l1" file="rh_p12_rn/l1.stl" scale="0.001 0.001 0.001"/>
     <mesh name="gripper_l2" file="rh_p12_rn/l2.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="table_1" file="ffw_s/table_1.bin.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="table_3" file="ffw_s/table_3.bin.stl" scale="0.001 0.001 0.001"/>
   </asset>
 
   <default>
